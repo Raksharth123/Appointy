@@ -8,21 +8,44 @@ const Footer = () => {
       color: 'white',
       padding: '60px 0 24px'
     }}>
+      <style>{`
+        .footer-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr;
+          gap: 48px;
+          margin-bottom: 48px;
+        }
+        @media (max-width: 768px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+          }
+          .footer-brand {
+            grid-column: 1 / -1;
+          }
+        }
+        @media (max-width: 400px) {
+          .footer-grid {
+            grid-template-columns: 1fr;
+          }
+          .footer-brand {
+            grid-column: 1;
+          }
+        }
+      `}</style>
+
       <div className="container">
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr 1fr',
-          gap: 48,
-          marginBottom: 48
-        }}>
+        <div className="footer-grid">
+
           {/* Brand */}
-          <div>
+          <div className="footer-brand">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               <div style={{
                 width: 36, height: 36,
                 background: 'var(--primary)',
                 borderRadius: 10,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0
               }}>
                 <span style={{ fontSize: 20 }}>🏥</span>
               </div>
@@ -39,7 +62,9 @@ const Footer = () => {
           <div>
             <h4 style={{ marginBottom: 16, fontFamily: 'Playfair Display, serif' }}>Quick Links</h4>
             {['Home', 'Doctors', 'About'].map(link => (
-              <Link key={link} to={link === 'Home' ? '/' : `/${link.toLowerCase()}`}
+              <Link
+                key={link}
+                to={link === 'Home' ? '/' : `/${link.toLowerCase()}`}
                 style={{ display: 'block', color: '#9ca3af', marginBottom: 8, transition: 'color 0.2s' }}
                 onMouseEnter={e => e.target.style.color = 'white'}
                 onMouseLeave={e => e.target.style.color = '#9ca3af'}
@@ -52,7 +77,7 @@ const Footer = () => {
           {/* Contact */}
           <div>
             <h4 style={{ marginBottom: 16, fontFamily: 'Playfair Display, serif' }}>Contact</h4>
-            <p style={{ color: '#9ca3af', marginBottom: 8 }}>📧 support@appointy.com</p>
+            <p style={{ color: '#9ca3af', marginBottom: 8, wordBreak: 'break-word' }}>📧 support@appointy.com</p>
             <p style={{ color: '#9ca3af', marginBottom: 8 }}>📞 +91 98765 43210</p>
             <p style={{ color: '#9ca3af' }}>🕒 Mon–Sat, 9am–6pm</p>
           </div>

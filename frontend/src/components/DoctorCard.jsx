@@ -11,7 +11,8 @@ const DoctorCard = ({ doctor }) => {
       style={{
         cursor: 'pointer',
         transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        width: '100%'
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-6px)'
@@ -22,10 +23,10 @@ const DoctorCard = ({ doctor }) => {
         e.currentTarget.style.boxShadow = 'var(--shadow)'
       }}
     >
-      {/* Image */}
+      {/* Image — shorter on mobile */}
       <div style={{
         background: 'var(--primary-light)',
-        height: 200,
+        height: 180,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -34,21 +35,21 @@ const DoctorCard = ({ doctor }) => {
         <img
           src={doctor.image}
           alt={doctor.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
           onError={e => { e.target.src = 'https://via.placeholder.com/200x200?text=Dr' }}
         />
       </div>
 
       {/* Info */}
-      <div style={{ padding: '16px' }}>
-        {/* Availability */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+      <div style={{ padding: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
           <div style={{
             width: 8, height: 8, borderRadius: '50%',
-            background: doctor.available ? '#22c55e' : '#ef4444'
+            background: doctor.available ? '#22c55e' : '#ef4444',
+            flexShrink: 0
           }} />
           <span style={{
-            fontSize: 12,
+            fontSize: 11,
             color: doctor.available ? '#22c55e' : '#ef4444',
             fontWeight: 500
           }}>
@@ -56,27 +57,30 @@ const DoctorCard = ({ doctor }) => {
           </span>
         </div>
 
-        <h3 style={{ fontSize: '1.1rem', marginBottom: 4 }}>{doctor.name}</h3>
-        <p style={{ color: 'var(--grey)', fontSize: 13 }}>{doctor.speciality}</p>
+        <h3 style={{ fontSize: '0.95rem', marginBottom: 4, lineHeight: 1.3 }}>{doctor.name}</h3>
+        <p style={{ color: 'var(--grey)', fontSize: 12 }}>{doctor.speciality}</p>
 
         <div style={{
-          marginTop: 12,
-          paddingTop: 12,
+          marginTop: 10,
+          paddingTop: 10,
           borderTop: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 6
         }}>
-          <span style={{ fontSize: 13, color: 'var(--grey)' }}>
+          <span style={{ fontSize: 12, color: 'var(--grey)' }}>
             {doctor.experience} exp.
           </span>
           <span style={{
             background: 'var(--primary-light)',
             color: 'var(--primary)',
-            fontSize: 12,
-            padding: '4px 10px',
+            fontSize: 11,
+            padding: '4px 8px',
             borderRadius: 50,
-            fontWeight: 500
+            fontWeight: 500,
+            whiteSpace: 'nowrap'
           }}>
             Book Now →
           </span>

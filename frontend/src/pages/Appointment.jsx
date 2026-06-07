@@ -16,7 +16,6 @@ const Appointment = () => {
   const [selectedDay, setSelectedDay] = useState(0)
   const [selectedTime, setSelectedTime] = useState('')
   const [loading, setLoading] = useState(false)
-  const [appointmentId, setAppointmentId] = useState(null)
 
   useEffect(() => {
     const doc = doctors.find(d => d._id === docId)
@@ -46,7 +45,6 @@ const Appointment = () => {
     setSlots(allSlots)
   }, [doctor])
 
-  // Step 1 - Book appointment first, then open Razorpay
   const bookAppointment = async () => {
     if (!token) { toast.error('Please login first'); navigate('/login'); return }
     if (!selectedTime) { toast.error('Please select a time slot'); return }
@@ -56,7 +54,6 @@ const Appointment = () => {
       const date = slots[selectedDay].date
       const slotDate = `${date.getDate()}_${date.getMonth() + 1}_${date.getFullYear()}`
 
-      // First book the appointment
       const { data } = await axios.post(
         `${backendUrl}/api/user/book-appointment`,
         { docId, slotDate, slotTime: selectedTime },
@@ -64,13 +61,10 @@ const Appointment = () => {
       )
 
       if (data.success) {
-        // Get the latest appointment id
         const apptRes = await axios.get(`${backendUrl}/api/user/appointments`, { headers: { token } })
         const appointments = apptRes.data.appointments
         const latest = appointments[appointments.length - 1]
-        setAppointmentId(latest._id)
 
-        // Open Razorpay
         await initRazorpayPayment(latest._id, latest.amount)
         getDoctors()
       } else {
@@ -82,8 +76,7 @@ const Appointment = () => {
     setLoading(false)
   }
 
-  // Step 2 - Init Razorpay payment
-  const initRazorpayPayment = async (apptId, amount) => {
+  const initRazorpayPayment = async (apptId) => {
     try {
       const { data } = await axios.post(
         `${backendUrl}/api/user/payment-razorpay`,
@@ -91,10 +84,7 @@ const Appointment = () => {
         { headers: { token } }
       )
 
-      if (!data.success) {
-        toast.error(data.message)
-        return
-      }
+      if (!data.success) { toast.error(data.message); return }
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -116,23 +106,17 @@ const Appointment = () => {
             } else {
               toast.error('Payment verification failed')
             }
-          } catch (err) {
+          } catch {
             toast.error('Payment verification error')
           }
         },
-        prefill: {
-          name: '',
-          email: '',
-        },
-        theme: {
-          color: '#0a6c5a'
-        }
+        prefill: { name: '', email: '' },
+        theme: { color: '#0a6c5a' }
       }
 
       const rzp = new window.Razorpay(options)
       rzp.open()
-
-    } catch (err) {
+    } catch {
       toast.error('Payment initialization failed')
     }
   }
@@ -144,26 +128,87 @@ const Appointment = () => {
   )
 
   return (
-    <div className="container" style={{ padding: '48px 24px' }}>
-      {/* Doctor Info */}
-      <div className="card" style={{ padding: 32, display: 'flex', gap: 32, marginBottom: 32 }}>
+    <div className="container" style={{ padding: '32px 16px' }}>
+      <style>{`
+        .appt-doctor-card {
+          display: flex;
+          flex-direction: row;
+          gap: 32px;
+          padding: 32px;
+        }
+        .appt-doctor-img {
+          width: 160px;
+          height: 160px;
+          border-radius: 16px;
+          object-fit: cover;
+          flex-shrink: 0;
+          background: var(--primary-light);
+        }
+        .appt-name-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 8px;
+        }
+        .appt-name {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.8rem;
+        }
+        .time-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 32px;
+        }
+
+        @media (max-width: 768px) {
+          .appt-doctor-card {
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            align-items: center;
+            text-align: center;
+          }
+          .appt-doctor-img {
+            width: 120px;
+            height: 120px;
+          }
+          .appt-name {
+            font-size: 1.4rem;
+          }
+          .appt-name-row {
+            justify-content: center;
+          }
+          .appt-about {
+            max-width: 100% !important;
+          }
+          .appt-book-card {
+            padding: 20px !important;
+          }
+          .appt-confirm-btn {
+            width: 100%;
+            text-align: center;
+          }
+        }
+      `}</style>
+
+      {/* Doctor Info Card */}
+      <div className="card appt-doctor-card" style={{ marginBottom: 24 }}>
         <img
           src={doctor.image}
           alt={doctor.name}
-          style={{
-            width: 160, height: 160,
-            borderRadius: 16, objectFit: 'cover',
-            background: 'var(--primary-light)'
-          }}
+          className="appt-doctor-img"
           onError={e => e.target.src = 'https://via.placeholder.com/160?text=Dr'}
         />
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.8rem' }}>{doctor.name}</h2>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="appt-name-row">
+            <h2 className="appt-name">{doctor.name}</h2>
             <div style={{
               display: 'flex', alignItems: 'center', gap: 6,
               background: doctor.available ? '#dcfce7' : '#fee2e2',
-              padding: '4px 12px', borderRadius: 50
+              padding: '4px 12px', borderRadius: 50,
+              flexShrink: 0
             }}>
               <div style={{
                 width: 8, height: 8, borderRadius: '50%',
@@ -177,28 +222,31 @@ const Appointment = () => {
               </span>
             </div>
           </div>
+
           <p style={{ color: 'var(--primary)', fontWeight: 500, marginBottom: 8 }}>
             {doctor.speciality}
           </p>
           <p style={{ color: 'var(--grey)', fontSize: 14, marginBottom: 16 }}>
             {doctor.degree} • {doctor.experience} experience
           </p>
-          <div style={{
+
+          <div className="appt-about" style={{
             background: 'var(--light)', borderRadius: 12,
-            padding: '16px', maxWidth: 500
+            padding: '14px', maxWidth: 500
           }}>
             <p style={{ fontSize: 14, color: 'var(--dark)', lineHeight: 1.7 }}>
               {doctor.about}
             </p>
           </div>
+
           <p style={{ marginTop: 16, fontWeight: 600, color: 'var(--primary)' }}>
             Consultation Fee: ₹{doctor.fees}
           </p>
         </div>
       </div>
 
-      {/* Booking */}
-      <div className="card" style={{ padding: 32 }}>
+      {/* Booking Card */}
+      <div className="card appt-book-card" style={{ padding: 32 }}>
         <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.4rem', marginBottom: 24 }}>
           Book Your Slot
         </h3>
@@ -207,14 +255,18 @@ const Appointment = () => {
         <p style={{ fontSize: 13, color: 'var(--grey)', fontWeight: 600, marginBottom: 12, letterSpacing: 1 }}>
           SELECT DATE
         </p>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 28, overflowX: 'auto', paddingBottom: 4 }}>
+        <div style={{
+          display: 'flex', gap: 10, marginBottom: 28,
+          overflowX: 'auto', paddingBottom: 8,
+          WebkitOverflowScrolling: 'touch'
+        }}>
           {slots.map((slot, i) => (
             <button
               key={i}
               onClick={() => { setSelectedDay(i); setSelectedTime('') }}
               style={{
                 flexShrink: 0,
-                padding: '12px 20px',
+                padding: '10px 16px',
                 borderRadius: 12,
                 border: '2px solid',
                 borderColor: selectedDay === i ? 'var(--primary)' : 'var(--border)',
@@ -222,10 +274,10 @@ const Appointment = () => {
                 color: selectedDay === i ? 'white' : 'var(--dark)',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
-                minWidth: 80
+                minWidth: 64
               }}
             >
-              <div style={{ fontSize: 12, marginBottom: 4 }}>
+              <div style={{ fontSize: 11, marginBottom: 4 }}>
                 {DAYS[slot.date.getDay()]}
               </div>
               <div style={{ fontWeight: 600 }}>{slot.date.getDate()}</div>
@@ -237,7 +289,7 @@ const Appointment = () => {
         <p style={{ fontSize: 13, color: 'var(--grey)', fontWeight: 600, marginBottom: 12, letterSpacing: 1 }}>
           SELECT TIME
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 32 }}>
+        <div className="time-grid">
           {slots[selectedDay]?.slots.length === 0 ? (
             <p style={{ color: 'var(--grey)', fontSize: 14 }}>No slots available for this day</p>
           ) : (
@@ -246,13 +298,13 @@ const Appointment = () => {
                 key={time}
                 onClick={() => setSelectedTime(time)}
                 style={{
-                  padding: '10px 20px',
+                  padding: '10px 16px',
                   borderRadius: 10,
                   border: '2px solid',
                   borderColor: selectedTime === time ? 'var(--primary)' : 'var(--border)',
                   background: selectedTime === time ? 'var(--primary)' : 'white',
                   color: selectedTime === time ? 'white' : 'var(--dark)',
-                  cursor: 'pointer', fontSize: 14,
+                  cursor: 'pointer', fontSize: 13,
                   transition: 'all 0.2s'
                 }}
               >
@@ -265,10 +317,11 @@ const Appointment = () => {
         <button
           onClick={bookAppointment}
           disabled={loading || !doctor.available}
-          className="btn-primary"
+          className="btn-primary appt-confirm-btn"
           style={{
             fontSize: 16, padding: '14px 40px',
-            opacity: (!doctor.available || loading) ? 0.6 : 1
+            opacity: (!doctor.available || loading) ? 0.6 : 1,
+            marginTop: 8
           }}
         >
           {loading ? 'Processing...' : `Pay ₹${doctor.fees} & Confirm`}
