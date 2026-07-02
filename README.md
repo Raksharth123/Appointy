@@ -1,7 +1,5 @@
 # Appointy - Doctor Appointment Booking Web App
 
-🚀 **Live Demo:** [https://appointy-frontend-9mlq.onrender.com](https://appointy-frontend-9mlq.onrender.com)
-
 Appointy is a full-stack web application designed to make healthcare more accessible by simplifying the process of booking doctor appointments. Patients can search for doctors, book appointments, and pay securely online — all from one platform. Built using the MERN stack with Vite for a lightning-fast frontend experience.
 
 ---
