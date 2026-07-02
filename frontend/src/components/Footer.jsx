@@ -78,8 +78,8 @@ const Footer = () => {
           <div>
             <h4 style={{ marginBottom: 16, fontFamily: 'Playfair Display, serif' }}>Contact</h4>
             <p style={{ color: '#9ca3af', marginBottom: 8, wordBreak: 'break-word' }}>📧 support@appointy.com</p>
-            <p style={{ color: '#9ca3af', marginBottom: 8 }}>📞 +91 98765 43210</p>
-            <p style={{ color: '#9ca3af' }}>🕒 Mon–Sat, 9am–6pm</p>
+            <p style={{ color: '#9ca3af', marginBottom: 8 }}>📞 +91 7006836670 </p>
+            <p style={{ color: '#9ca3af' }}>🕒 24/7 Available </p>
           </div>
         </div>
 
